@@ -1,11 +1,19 @@
 "use client"
 import { useState, useEffect  } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import useAuth from "../../../utils/useAuth"
 
+export async function generateMetadata(context){
+    const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/aip/item/readsingle/${context.params.id}`,{cache:"no-store"})
+    const jsonData = await response.json()
+    const singleItem = jsonData.singleItem
+    return{
+        title:singleItem.title,
+        description:singleItem.description
+    }
+}
 
-const DeleteItem = (context) => {
+const UpdateItem = (context) => {
     const [title,setTitle] = useState("")
     const [price,setPrice] = useState("")
     const [image,setImage] = useState("")
@@ -15,18 +23,8 @@ const DeleteItem = (context) => {
     
     const router = useRouter()
     const loginUserEmail = useAuth()
-
-    const getSingleItem = async(id) => {
-        const response = await fetch(`http://localhost:3000/api/item/readsingle/${id}`,{chache:"no-store"})
-        const jsonData = await response.json()
-        const singleItem = jsonData.singleItem
-        setTitle(singleItem.title)
-        setPrice(singleItem.price)
-        setImage(singleItem.image)
-        setDescription(singleItem.description)
-        setEmail(singleItem.email)
-        setLoading(true)
-    }
+  
+    generateMetadata(context.params.id)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,8 +36,8 @@ const DeleteItem = (context) => {
     const handleSubmit = async(e) => {
         e.preventDefault()
         try{
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/item/delete/${context.params.id}`,{
-                method:"DELETE",
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/item/update/${context.params.id}`,{
+                method:"PUT",
                 headers:{
                     "Accept":"application",
                     "Content-Type":"application/json",
@@ -58,7 +56,7 @@ const DeleteItem = (context) => {
             router.push("/")
             router.refresh()
         } catch{
-            alert("アイテム削除失敗")
+            alert("アイテム編集失敗")
         }
     }
     
@@ -66,13 +64,13 @@ const DeleteItem = (context) => {
         if(loginUserEmail === email){
             return(
                 <div>
-                    <h1 className="page-title">アイテム削除</h1>
+                    <h1 className="page-title">アイテム編集</h1>
                     <form onSubmit={handleSubmit}>
-                        <h2>{title}</h2>
-                        <Image src={image} width={750} height={500} alt="item-image" priority/>
-                        <h3>\{price}</h3>
-                        <p>{description}</p>
-                        <button>削除</button>
+                        <input value={title} onChange={(e)=>setTitle(e.target.value)} type="text" name="title" placeholder="アイテム名" required/>
+                        <input value={price} onChange={(e)=>setPrice(e.target.value)} type="text" name="price" placeholder="価格" required/>
+                        <input value={image} onChange={(e)=>setImage(e.target.value)} type="text" name="image" placeholder="画像" required/>
+                        <textarea value={description} onChange={(e)=>setDescription(e.target.value)} name="description" rows={15} placeholder="商品説明"></textarea>
+                        <button>編集</button>
                     </form>
                 </div>
             )
@@ -80,8 +78,8 @@ const DeleteItem = (context) => {
             return <h1>権限がありません</h1>
         }
     } else {
-        return <h1>権限がありません</h1>
+        return <h1>ローディング中...</h1>
     }
 }
 
-export default DeleteItem
+export default UpdateItem

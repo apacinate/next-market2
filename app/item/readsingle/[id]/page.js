@@ -1,6 +1,15 @@
 import Image from "next/image"
 
+export async function generateMetadata(context){
+    const singleItem = await getSingleItem(context.params.id)
+    return {
+        titel:singleItem.title,
+        description:singleItem.description
+    }
+}
+
 const getSingleItem = async(id) => {
+    generateMetadata(id)
     const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/item/readsingle/${id}`,{chache:"no-store"})
     const jsonData = await response.json()
     const singleItem = jsonData.singleItem

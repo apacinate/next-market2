@@ -9,25 +9,21 @@ const ImgInput = (props) => {
             data.append("file", imageFile)
             data.append("upload_preset","next-market")
             data.append("cloud_name","dtkjmrmo5")
-            const response = await fetch("https://api.cloudinary.com/v1_1/dtkjmrmo5/iomage/uploada",
-                {
-                    method:"POST",
-                    body:data
-                }
-            )
-            const jsonData = await response.json()
-            await props.setImage(jsonData.url)
-            alert("画像アップロード成功")
+            const response = await fetch("https://api.cloudinary.com/v1_1/dtkjmrmo5/image/upload",{
+                method:"POST", body:data})
+                const jsonData = await response.json()
+                await props.setImage(jsonData.url)
+                alert("画像アップロード成功")
         } catch {
             alert("画像アップロード失敗")
         }
-        return(
-            <div className="img-input">
-                <input type="file" onChange={(e)=>setImageFile(e.target.files[0])} accept="image/png, image/jpg"/>
-                <button onClick={handleClick} disabled={!imageFile}>画像Upload</button>
-            </div>
-        )
     }
+    return(
+        <div className="img-input">
+            <input type="file" onChange={(e)=>setImageFile(e.target.files[0])} accept="image/png, image/jpg"/>
+            <button onClick={handleClick} disabled={!imageFile}>画像Upload</button>
+        </div>
+    )
 }
 
 export default ImgInput
